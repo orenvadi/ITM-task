@@ -1,45 +1,28 @@
 package main
 
-func testEq(a, b []rune) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
-}
+import (
+	"fmt"
+	"os"
 
-// MaskLinks masks links in the input string by replacing them with asterisks.
-func MaskLinks(input string) string {
-	data := []rune(input)
-	linkPrefix := []rune("http://")
+	"github.com/orenvadi/ITM-Task/masking"
+)
 
-	isLink := false
-	c := 6
-	for i := 0; i < len(data)-6; i++ {
-
-		if testEq(data[i:i+7], linkPrefix) {
-			isLink = true
-			continue
-		}
-
-		if isLink && c > 0 {
-			c--
-			continue
-		}
-
-		if data[i] == rune(' ') {
-			isLink = false
-		}
-
-		if isLink {
-			data[i] = '*'
-		}
-
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: go run main.go path/to/file")
+		return
 	}
 
-	return string(data)
+	filePath := os.Args[1]
+
+	prod := masking.NewFileProducer(filePath)
+	pres := masking.NewFileWriterPresenter("output.txt") // Путь к файлу вывода результата
+
+	service := masking.NewService(prod, pres)
+	if err := service.Run(); err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	fmt.Println("\nLinks masked succesfully!")
 }
